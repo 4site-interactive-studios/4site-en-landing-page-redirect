@@ -1,19 +1,27 @@
-/* Added by 4Site Studios on 2024-11-21
+/* Engaging Networks Homepage Takeover Redirect Script
 
-Source Code: https://github.com/4site-interactive-studios/4site-nthp-eoy-redirect/blob/main/landing-page-gtm-tag.js
-Productive Task: https://app.productive.io/2650-4site-interactive-studios-inc/tasks/9437529
+Source Code: https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/landing-page-gtm-tag.js
 
-This script manages time-based redirections for specific dates on our landing pages. It checks the current date and, if it matches a target date, redirects users to a designated URL for that day. The script also includes a suppression feature: it sets a cookie to prevent multiple redirects within a 24-hour period and allows users to opt out of redirection by  adding a 'no-redirect' parameter to the URL. Additionally, any query parameters from the original URL are preserved and passed along to the redirect destination.
+This script manages time-based redirections for specific dates on landing pages. It checks the current date and, if it matches a target date, redirects users to a designated Engaging Networks page URL for that day. The script also includes a suppression feature: it sets a cookie to prevent multiple redirects within a 24-hour period and allows users to opt out of redirection by adding a 'no-redirect' parameter to the URL. Additionally, any query parameters from the original URL are preserved and passed along to the redirect destination.
 */
-  
-(function() {
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+// Configure the dates and corresponding Engaging Networks page URLs
+// Date format: "MM-DD" (e.g., "12-03" for December 3rd)
+// Include any necessary URL parameters such as tracking codes in the URLs
 var urlsByDate = {
-    "12-03": "https://support.savingplaces.org/page/75455/donate/1?transaction.othamt1=HF25C2SDGENC",
-    "12-30": "https://support.savingplaces.org/page/75455/donate/1?transaction.othamt1=HF25C2SDGENC",
-    "12-31": "https://support.savingplaces.org/page/75455/donate/1?transaction.othamt1=HF25C2SDGENC"
+    "12-03": "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
+    "12-30": "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
+    "12-31": "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE"
 };
 
+// Cookie name used to suppress redirects (prevents multiple redirects within 24 hours)
 var suppressionCookie = "redirectSuppressed";
+// ============================================================================
+
+(function() {
 var queryParams = new URLSearchParams(window.location.search);
 
 // Function to set a cookie with an expiration date
