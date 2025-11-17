@@ -6,6 +6,7 @@
 // ============================================================================
 // Customize the return link text template
 // The domain will be automatically extracted from the referrer/originating URL
+// Example: If the referrer is "https://example.org/page", the output will be "Click here to continue to example.org"
 const returnLinkTextTemplate = "Click here to continue to {domain}";
 // ============================================================================
 
@@ -34,36 +35,38 @@ const returnLinkTextTemplate = "Click here to continue to {domain}";
     document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
   }
 
-  // Save originating URL to cookie if present
+  // Save originating URL to cookie if present in query parameters
+  // Cookie expires in 30 minutes (1800 seconds)
   if (originatingUrlParam) {
     setCookie("originatingUrl", originatingUrlParam, 1800);
 
-    // Remove the originating-url argument from the URL
+    // Remove the originating-url parameter from the URL for cleaner address bar
     queryParams.delete("originating-url");
     const newQueryString = queryParams.toString();
     const newUrl = `${window.location.pathname}${
       newQueryString ? "?" + newQueryString : ""
     }`;
 
-    // Update the browser URL without reloading the page
+    // Update browser URL without page reload
     window.history.replaceState(null, "", newUrl);
   }
 
   const originatingUrl = originatingUrlParam || originatingUrlCookie;
 
-  // Function to extract domain from a URL
+  // Extract domain (hostname) from a URL string
   function getDomainFromUrl(url) {
     try {
       const urlObj = new URL(url);
       return urlObj.hostname;
     } catch (e) {
-      // If URL parsing fails, try to extract domain manually
+      // Fallback: manually extract domain if URL constructor fails
       const match = url.match(/https?:\/\/([^\/]+)/);
       return match ? match[1] : url;
     }
   }
 
-  // Function to generate return link text from referrer/originating URL
+  // Generate return link text by extracting domain from referrer/originating URL
+  // Falls back to "the website" if no URL is available
   function getReturnLinkText() {
     const sourceUrl = originatingUrl || document.referrer;
     if (!sourceUrl) {
@@ -73,7 +76,7 @@ const returnLinkTextTemplate = "Click here to continue to {domain}";
     return returnLinkTextTemplate.replace("{domain}", domain);
   }
 
-  // Declare bar outside of the if block so it can be accessed globally within the function
+  // Declare bar outside the if block for global access within the function scope
   let bar;
 
   // Function to adjust the body's margin based on the banner height
@@ -100,19 +103,19 @@ const returnLinkTextTemplate = "Click here to continue to {domain}";
     bar.appendChild(returnLink);
     document.body.appendChild(bar);
 
-    // Use requestAnimationFrame to ensure the banner is fully rendered before adjusting margin
+    // Wait for banner to render before adjusting body margin
     requestAnimationFrame(adjustBodyMargin);
 
-    // Handle window resize
+    // Adjust margin when window is resized
     window.addEventListener("resize", adjustBodyMargin);
 
-    // Handle return link click
+    // Handle return link click - redirect back to originating page
     returnLink.addEventListener("click", function (e) {
       e.preventDefault();
       queryParams.delete("was-redirected");
       queryParams.delete("originating-url");
 
-      // Redirect back using the original URL from the cookie, adding `no-redirect`
+      // Redirect back to original URL with no-redirect parameter to prevent redirect loop
       const originalUrl = new URL(originatingUrl || document.referrer || "/");
       originalUrl.searchParams.set("no-redirect", "");
 

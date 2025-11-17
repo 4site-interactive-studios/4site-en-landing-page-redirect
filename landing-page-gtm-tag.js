@@ -12,64 +12,74 @@ This script manages time-based redirections for specific dates on landing pages.
 // Date format: "MM-DD" (e.g., "12-03" for December 3rd)
 // Include any necessary URL parameters such as tracking codes in the URLs
 var urlsByDate = {
-    "12-03": "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
-    "12-30": "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
-    "12-31": "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE"
+  "12-03":
+    "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
+  "12-30":
+    "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
+  "12-31":
+    "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
 };
 
 // Cookie name used to suppress redirects (prevents multiple redirects within 24 hours)
 var suppressionCookie = "redirectSuppressed";
 // ============================================================================
 
-(function() {
-var queryParams = new URLSearchParams(window.location.search);
+(function () {
+  var queryParams = new URLSearchParams(window.location.search);
 
-// Function to set a cookie with an expiration date
-function setCookie(name, value, days) {
+  // Set a cookie with expiration date (specified in days)
+  function setCookie(name, value, days) {
     var date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000)); // Days to milliseconds
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000); // Convert days to milliseconds
     var expires = "expires=" + date.toUTCString();
     document.cookie = name + "=" + value + "; " + expires + "; path=/";
-}
+  }
 
-// If no-redirect is present, set the suppression cookie for 24 hours and exit
-if (queryParams.has("no-redirect")) {
-    setCookie(suppressionCookie, "true", 1); // Set suppression cookie for 1 day
+  // If no-redirect parameter is present, set suppression cookie and exit
+  // This allows users to opt out of redirects
+  if (queryParams.has("no-redirect")) {
+    setCookie(suppressionCookie, "true", 1); // Suppress redirects for 24 hours
     return;
-}
+  }
 
-// Check for suppression cookie
-if (document.cookie.indexOf(suppressionCookie) !== -1) {
-    return; // Suppression is active, so exit
-}
+  // Check if suppression cookie exists (user has already been redirected or opted out)
+  if (document.cookie.indexOf(suppressionCookie) !== -1) {
+    return; // Exit early - suppression is active
+  }
 
-// Function to build redirect URL with original parameters, was-redirected, and originating URL
-function buildRedirectUrl(redirectUrl) {
+  // Build redirect URL by appending original query parameters and tracking flags
+  // Preserves all original URL parameters and adds was-redirected and originating-url flags
+  function buildRedirectUrl(redirectUrl) {
     var redirectParams = new URLSearchParams(queryParams.toString());
     redirectParams.append("was-redirected", "");
     redirectParams.append("originating-url", window.location.href);
-    var separator = redirectUrl.indexOf('?') === -1 ? '?' : '&';
+    var separator = redirectUrl.indexOf("?") === -1 ? "?" : "&";
     return redirectUrl + separator + redirectParams.toString();
-}
+  }
 
-// Get the current date or the simulated date from query params
-function getCurrentOrSimulatedDate() {
+  // Get current date in MM-DD format, or use simulated date from query parameter for testing
+  // Allows testing redirects on any date using ?simulate-date=MM-DD
+  function getCurrentOrSimulatedDate() {
     var simulateDate = queryParams.get("simulate-date");
     if (simulateDate && /^\d{2}-\d{2}$/.test(simulateDate)) {
-    return simulateDate; // Use the simulated date if provided and valid
+      return simulateDate; // Use simulated date if provided and valid (MM-DD format)
     }
     var today = new Date();
-    return String(today.getMonth() + 1).padStart(2, '0') + "-" + String(today.getDate()).padStart(2, '0');
-}
+    return (
+      String(today.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(today.getDate()).padStart(2, "0")
+    );
+  }
 
-// Check if the date is one of the specified target dates
-var todayFormatted = getCurrentOrSimulatedDate();
+  // Check if today's date matches a configured redirect date
+  var todayFormatted = getCurrentOrSimulatedDate();
 
-if (urlsByDate[todayFormatted]) {
-    // Set the suppression cookie before redirecting to prevent further redirects
-    setCookie(suppressionCookie, "true", 1); // Set suppression cookie for 1 day
+  if (urlsByDate[todayFormatted]) {
+    // Set suppression cookie before redirecting to prevent redirect loops
+    setCookie(suppressionCookie, "true", 1); // Suppress for 24 hours
 
-    // Redirect to the corresponding URL
+    // Redirect to the configured Engaging Networks page for this date
     window.location.href = buildRedirectUrl(urlsByDate[todayFormatted]);
-}
+  }
 })();
