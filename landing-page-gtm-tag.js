@@ -9,7 +9,8 @@ This script manages time-based redirections for specific dates on landing pages.
 // CONFIGURATION
 // ============================================================================
 // Configure the dates and corresponding Engaging Networks page URLs
-// Date format: "MM-DD" (e.g., "12-03" for December 3rd)
+// Date formats: "MM-DD" (e.g., "12-03" for December 3rd, matches every year)
+//               or "MM-DD-YYYY" (e.g., "12-03-2024" for December 3rd, 2024, matches specific year)
 // Include any necessary URL parameters such as tracking codes in the URLs
 const urlsByDate = {
   "12-03":
@@ -80,25 +81,49 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
     }
   }
 
-  // Validate that a date string in MM-DD format represents a valid date
+  // Validate that a date string in MM-DD or MM-DD-YYYY format represents a valid date
   function isValidDate(dateStr) {
-    const [month, day] = dateStr.split("-").map(Number);
+    const parts = dateStr.split("-");
+    if (parts.length !== 2 && parts.length !== 3) return false;
+
+    const month = Number(parts[0]);
+    const day = Number(parts[1]);
+    const year = parts.length === 3 ? Number(parts[2]) : null;
+
     if (month < 1 || month > 12 || day < 1 || day > 31) return false;
-    // Create a date object to validate (using year 2000 as a non-leap year baseline)
-    const date = new Date(2000, month - 1, day);
-    return date.getMonth() === month - 1 && date.getDate() === day;
+    if (year !== null && (year < 1000 || year > 9999)) return false;
+
+    // Create a date object to validate
+    const validationYear = year || 2000; // Use provided year or 2000 as baseline
+    const date = new Date(validationYear, month - 1, day);
+    return (
+      date.getMonth() === month - 1 &&
+      date.getDate() === day &&
+      (year === null || date.getFullYear() === year)
+    );
+  }
+
+  // Normalize date string to MM-DD format (removes year if present)
+  function normalizeDate(dateStr) {
+    const parts = dateStr.split("-");
+    if (parts.length === 3) {
+      return parts[0] + "-" + parts[1]; // Return MM-DD from MM-DD-YYYY
+    }
+    return dateStr; // Already in MM-DD format
   }
 
   // Get current date in MM-DD format, or use simulated date from query parameter for testing
-  // Allows testing redirects on any date using ?simulate-date=MM-DD
+  // Allows testing redirects on any date using ?simulate-date=MM-DD or ?simulate-date=MM-DD-YYYY
   function getCurrentOrSimulatedDate() {
     const simulateDate = queryParams.get("simulate-date");
     if (
       simulateDate &&
-      /^\d{2}-\d{2}$/.test(simulateDate) &&
+      (/^\d{2}-\d{2}$/.test(simulateDate) ||
+        /^\d{2}-\d{2}-\d{4}$/.test(simulateDate)) &&
       isValidDate(simulateDate)
     ) {
-      return simulateDate; // Use simulated date if provided and valid (MM-DD format)
+      // Normalize to MM-DD format for comparison
+      return normalizeDate(simulateDate);
     }
     const today = new Date();
     return (
@@ -108,14 +133,30 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
     );
   }
 
-  // Check if today's date matches a configured redirect date
-  const todayFormatted = getCurrentOrSimulatedDate();
+  // Get current date in MM-DD-YYYY format for year-specific matching
+  function getCurrentDateWithYear() {
+    const today = new Date();
+    return (
+      String(today.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(today.getDate()).padStart(2, "0") +
+      "-" +
+      String(today.getFullYear())
+    );
+  }
 
-  if (urlsByDate[todayFormatted]) {
+  // Check if today's date matches a configured redirect date
+  const todayFormatted = getCurrentOrSimulatedDate(); // MM-DD format
+  const todayWithYear = getCurrentDateWithYear(); // MM-DD-YYYY format
+
+  // Check for exact year-specific match first, then fall back to year-agnostic match
+  const redirectUrl = urlsByDate[todayWithYear] || urlsByDate[todayFormatted];
+
+  if (redirectUrl) {
     // Set suppression cookie before redirecting to prevent redirect loops
     setCookie(suppressionCookie, "true", SUPPRESSION_DURATION_DAYS);
 
     // Redirect to the configured Engaging Networks page for this date
-    window.location.href = buildRedirectUrl(urlsByDate[todayFormatted]);
+    window.location.href = buildRedirectUrl(redirectUrl);
   }
 })();
