@@ -4,10 +4,10 @@
 /* CONFIGURATION:
 This script requires a configuration object to be defined before it loads:
   window.targetPageConfig = {
-    returnLinkTextTemplate: "Click here to continue to {domain}",  // Template with {domain} placeholder
-    cookieExpirationSeconds: 1800,  // Cookie expiration in seconds (optional, defaults shown)
+    returnLinkTextTemplate: "Click here to continue to {domain}",  // Template with {domain} placeholder (optional, defaults shown)
     bannerStyle: "...",              // CSS string for banner styling (optional, defaults shown)
     linkStyle: "..."                 // CSS string for link styling (optional, defaults shown)
+    cookieExpirationSeconds: 1800,  // Cookie expiration in seconds (optional, defaults shown)
   };
 */
 
@@ -22,23 +22,16 @@ This script requires a configuration object to be defined before it loads:
 
   const config = window.targetPageConfig;
 
-  // Validate required configuration
-  if (
-    !config.returnLinkTextTemplate ||
-    typeof config.returnLinkTextTemplate !== "string"
-  ) {
-    console.error(
-      "target-page-script.js: 'returnLinkTextTemplate' string is required in configuration."
-    );
-    return;
-  }
-
   // Set defaults for optional configuration
-  const returnLinkTextTemplate = config.returnLinkTextTemplate;
+  const returnLinkTextTemplate =
+    config.returnLinkTextTemplate &&
+    typeof config.returnLinkTextTemplate === "string"
+      ? config.returnLinkTextTemplate
+      : "Click here to continue to {domain}";
   const COOKIE_EXPIRATION_SECONDS = config.cookieExpirationSeconds || 1800;
   const BANNER_STYLE =
     config.bannerStyle ||
-    "position:fixed;top:0;width:100%;background-color:#00689f;color:#fff;padding:15px 10px;text-align:center;z-index:9999;box-sizing:border-box;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;";
+    "position:fixed;top:0;width:100%;background-color:#000000;color:#fff;padding:15px 10px;text-align:center;z-index:9999;box-sizing:border-box;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;";
   const LINK_STYLE =
     config.linkStyle || "color:#ffffff;text-decoration:underline;";
 
@@ -108,10 +101,10 @@ This script requires a configuration object to be defined before it loads:
     if (!url || typeof url !== "string") {
       return null;
     }
-    
+
     try {
       const urlObj = new URL(url);
-      
+
       // Handle file:// URLs - extract filename or use generic text
       if (urlObj.protocol === "file:") {
         // Try to extract a meaningful name from the path
@@ -123,12 +116,12 @@ This script requires a configuration object to be defined before it loads:
         }
         return "the original page";
       }
-      
+
       // For http/https URLs, return the hostname
       if (urlObj.protocol === "http:" || urlObj.protocol === "https:") {
         return urlObj.hostname;
       }
-      
+
       // For other protocols, try to extract hostname
       return urlObj.hostname || null;
     } catch (e) {
@@ -137,13 +130,13 @@ This script requires a configuration object to be defined before it loads:
       if (httpMatch) {
         return httpMatch[1];
       }
-      
+
       // For file:// URLs, try to extract filename
       const fileMatch = url.match(/file:\/\/\/.+?\/([^\/]+\.html?)/i);
       if (fileMatch) {
         return fileMatch[1].replace(/\.html?$/, "");
       }
-      
+
       return null;
     }
   }
@@ -155,14 +148,14 @@ This script requires a configuration object to be defined before it loads:
     if (!sourceUrl) {
       return returnLinkTextTemplate.replace("{domain}", "the website");
     }
-    
+
     const domain = getDomainFromUrl(sourceUrl);
-    
+
     // If domain extraction failed or returned empty, use fallback
     if (!domain || domain === sourceUrl) {
       return returnLinkTextTemplate.replace("{domain}", "the website");
     }
-    
+
     return returnLinkTextTemplate.replace("{domain}", domain);
   }
 
@@ -210,13 +203,13 @@ This script requires a configuration object to be defined before it loads:
           originatingUrl ||
           document.referrer ||
           window.location.origin + window.location.pathname;
-        
+
         // Validate URL before redirecting
         if (!isValidUrl(fallbackUrl)) {
           console.error("Invalid redirect URL:", fallbackUrl);
           return;
         }
-        
+
         const originalUrl = new URL(fallbackUrl);
         originalUrl.searchParams.set("no-redirect", "");
 
@@ -230,4 +223,3 @@ This script requires a configuration object to be defined before it loads:
     });
   }
 })();
-
