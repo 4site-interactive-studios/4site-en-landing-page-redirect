@@ -86,7 +86,7 @@
       <ul>
         <li>
           <strong>Simulate a date:</strong> Add
-          <code>?simulate-date=2024-12-03</code> to test December 3rd, 2024
+          <code>?simulate-date=2025-12-03</code> to test December 3rd, 2025
           redirects
         </li>
         <li>
@@ -95,16 +95,16 @@
         </li>
         <li>
           <strong>Combined:</strong>
-          <code>?simulate-date=2024-12-03&no-redirect</code> to simulate a date
+          <code>?simulate-date=2025-12-03&no-redirect</code> to simulate a date
           but opt out
         </li>
       </ul>
 
       <div class="test-links">
-        <a href="?simulate-date=2024-12-03">Test: Dec 3, 2024</a>
-        <a href="?simulate-date=2024-12-30">Test: Dec 30, 2024</a>
-        <a href="?simulate-date=2024-12-31">Test: Dec 31, 2024</a>
-        <a href="?simulate-date=2024-01-15">Test: Jan 15, 2024 (No redirect)</a>
+        <a href="?simulate-date=2025-12-03">Test: Dec 3, 2025</a>
+        <a href="?simulate-date=2025-12-30">Test: Dec 30, 2025</a>
+        <a href="?simulate-date=2025-12-31">Test: Dec 31, 2025</a>
+        <a href="?simulate-date=2025-01-15">Test: Jan 15, 2025 (No redirect)</a>
         <a href="?no-redirect">Opt Out</a>
       </div>
     </div>
@@ -117,15 +117,15 @@
       </p>
       <ul>
         <li>
-          <strong>December 3, 2024</strong> - Redirects to Engaging Networks
+          <strong>December 3, 2025</strong> - Redirects to Engaging Networks
           page
         </li>
         <li>
-          <strong>December 30, 2024</strong> - Redirects to Engaging Networks
+          <strong>December 30, 2025</strong> - Redirects to Engaging Networks
           page
         </li>
         <li>
-          <strong>December 31, 2024</strong> - Redirects to Engaging Networks
+          <strong>December 31, 2025</strong> - Redirects to Engaging Networks
           page
         </li>
       </ul>
@@ -150,21 +150,21 @@
       // CONFIGURATION
       // ============================================================================
       // Configure the dates and corresponding Engaging Networks page URLs
-      // Date format: "YYYY-MM-DD" (e.g., "2024-12-03" for December 3rd, 2024)
+      // Date format: "YYYY-MM-DD" (e.g., "2025-12-03" for December 3rd, 2025)
       // Include any necessary URL parameters such as tracking codes in the URLs
       window.landingPageRedirectConfig = {
         urlsByDate: {
-          "2024-12-03":
+          "2025-12-03":
             "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
-          "2024-12-30":
+          "2025-12-30":
             "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
-          "2024-12-31":
+          "2025-12-31":
             "https://support.yourorganization.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
         },
         suppressionCookie: "redirectSuppressed",
         suppressionDurationDays: 1,
       };
     </script>
-    <script src="landing-page-script.js"></script>
+    <script src="redirect-script.js"></script>
   </body>
 </html>
