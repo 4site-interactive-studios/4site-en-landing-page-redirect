@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engaging Networks Donation Page - Example Target Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .header {
+        background-color: #00689f;
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+      }
+      .content {
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .info-box {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Engaging Networks Donation Page</h1>
+      <p>This is an example of the target page that users are redirected to</p>
+    </div>
+
+    <div class="content">
+      <h2>Donation Form</h2>
+      <p>
+        This page simulates an Engaging Networks donation page. When visitors
+        arrive here via redirect from the landing page, a banner will appear at
+        the top with a return link.
+      </p>
+
+      <div class="info-box">
+        <strong>Note:</strong> The banner at the top of this page is created by
+        the <code>target-page-script.js</code> script. It will only appear if:
+        <ul>
+          <li>
+            The visitor arrived via redirect (has
+            <code>was-redirected</code> parameter)
+          </li>
+          <li>The page is loaded in an iframe</li>
+          <li>An originating URL cookie exists from a previous redirect</li>
+        </ul>
+      </div>
+
+      <h3>Test Scenarios</h3>
+      <ul>
+        <li>
+          <strong>Direct visit:</strong> Visit this page directly - no banner
+          should appear
+        </li>
+        <li>
+          <strong>After redirect:</strong> Visit the landing page with a
+          simulated date that triggers a redirect - banner should appear
+        </li>
+        <li>
+          <strong>With cookie:</strong> If you have an originating URL cookie
+          from a previous redirect, the banner will appear
+        </li>
+      </ul>
+    </div>
+
+    <!-- 
+        ============================================================================
+        TARGET PAGE SCRIPT
+        ============================================================================
+        This script should be added to the Engaging Networks donation page
+        (and its thank-you page) to display the return message bar.
+        
+        To use in Engaging Networks:
+        1. Add the configuration object and script reference to your EN page
+        2. Customize the returnLinkTextTemplate as needed
+        3. Optionally customize bannerStyle and linkStyle
+        ============================================================================
+    -->
+    <script>
+      // ============================================================================
+      // CONFIGURATION
+      // ============================================================================
+      // Configure the return message bar that appears when visitors arrive via redirect
+      window.targetPageConfig = {
+        returnLinkTextTemplate: "Click here to continue to {domain}",
+        cookieExpirationSeconds: 1800, // 30 minutes
+        // Optional: Customize banner and link styles
+        // bannerStyle: "position:fixed;top:0;width:100%;background-color:#00689f;color:#fff;padding:15px 10px;text-align:center;z-index:9999;box-sizing:border-box;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;",
+        // linkStyle: "color:#ffffff;text-decoration:underline;",
+      };
+    </script>
+    <script src="target-page-script.js"></script>
+  </body>
+</html>
