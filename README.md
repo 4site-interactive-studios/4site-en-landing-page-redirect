@@ -6,9 +6,10 @@ This repository contains example code and resources for a **homepage takeover** 
 
 **Landing Page Script**: [`redirect-script.js`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/redirect-script.js)
 
-**Engaging Networks Page Code**: [`en-code-block.js`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/en-code-block.js)
+**Engaging Networks Page Code**: [`target-page-script.js`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/target-page-script.js)
 
-**Example HTML Files**: 
+**Example HTML Files**:
+
 - [`index.html`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/index.html) - Generic example landing page
 - [`wwf/index.html`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/wwf/index.html) - WWF-specific example landing page
 
@@ -20,7 +21,7 @@ This repository contains example code and resources for a **homepage takeover** 
    On a specified takeover date (or a simulated date for testing), the GTM tag script checks the current date. If it matches a target date, the user is **automatically redirected** from the landing page (e.g. the homepage) to the corresponding EN donation page. All URL query parameters from the original page are preserved and passed along to the donation page during the redirect.
 
 2. **Message Bar & Return Link**
-   When a visitor lands on the EN donation page via the redirect, a notice bar appears at the top of the page with a customizable prompt. The return link text automatically extracts the domain from the referrer URL (e.g. *"Click here to continue to yourwebsite.org"*). This message bar provides a **return link** that takes the user back to the original page they came from (the originating URL is stored and used for this link). This allows users to easily navigate back to the main site after seeing the donation form.
+   When a visitor lands on the EN donation page via the redirect, a notice bar appears at the top of the page with a customizable prompt. The return link text automatically extracts the domain from the referrer URL (e.g. _"Click here to continue to yourwebsite.org"_). This message bar provides a **return link** that takes the user back to the original page they came from (the originating URL is stored and used for this link). This allows users to easily navigate back to the main site after seeing the donation form.
 
 3. **Redirect Suppression**
    If the user clicks the return link (or if the system detects a `no-redirect` flag in the URL), the script will append a `no-redirect` parameter to the homepage URL and set a **suppression cookie**. This cookie lasts for 24 hours and tells the script not to redirect that user again. In other words, once a user returns to the site, they won't be immediately redirected again (even if they revisit the homepage on the same date), preventing any potential redirect loop or frustration.
@@ -33,30 +34,33 @@ To implement this homepage takeover on your site, follow these steps:
 
 1. **Configure the Redirect Script**
    The redirect script uses a configuration object that must be defined before the script loads. Create a configuration object with your specific dates and corresponding Engaging Networks page URLs.
-   
+
    **Date Format:**
-   - `"YYYY-MM-DD"` format (e.g., `"2025-12-03"`) - Matches the date only in the specified year (year-specific)
-   
+
+   - Only `"YYYY-MM-DD"` format is supported (e.g., `"2025-12-03"`). All dates must include the full year.
+
    Include any necessary URL arguments such as tracking codes in the URLs. See the example HTML files for reference on how to structure the configuration.
 
 2. **Configure the EN Page Code**
-   Edit the `en-code-block.js` file and set the `returnLinkTextTemplate` configuration variable at the top of the file with your desired return message text template. The template should include `{domain}` as a placeholder, which will be automatically replaced with the actual domain from the referrer URL. On the Engaging Networks donation page (and its thank-you page) that users will be redirected to, include this script at the bottom of the page. This code is responsible for displaying the return message bar and handling the return link logic on the EN pages.
+   The target page script uses a configuration object that must be defined before the script loads. Create a `window.targetPageConfig` object with your desired settings. The `returnLinkTextTemplate` should include `{domain}` as a placeholder, which will be automatically replaced with the actual domain from the referrer URL. On the Engaging Networks donation page (and its thank-you page) that users will be redirected to, include the configuration object and script tag. This code is responsible for displaying the return message bar and handling the return link logic on the EN pages.
 
 3. **Configure GTM Tag**
    In **Google Tag Manager**, create or edit a Custom HTML tag that includes:
+
    1. The configuration object (`window.landingPageRedirectConfig`) with your dates and URLs
    2. A script tag that loads `redirect-script.js` (you can host this file on your server or use a CDN)
-   
+
    Set the tag to fire on the appropriate pages (e.g., the site's homepage or site-wide). The script will automatically check dates and redirect when needed.
 
 4. **Publish / Testing GTM Changes**
-   After configuring the tag, publish the updated GTM container so that the changes are saved and ready. Before pushing the GTM container live, you can preview the homepage takeover using **GTM's Preview Mode**. This lets you test the functionality on the real site without affecting all visitors. 
-   
+   After configuring the tag, publish the updated GTM container so that the changes are saved and ready. Before pushing the GTM container live, you can preview the homepage takeover using **GTM's Preview Mode**. This lets you test the functionality on the real site without affecting all visitors.
+
    **Testing with Simulated Dates:**
+
    - Use the `YYYY-MM-DD` format: `https://yourwebsite.org?simulate-date=2025-12-03` (simulates December 3rd, 2025)
-   
+
    Using these URLs (with GTM Preview enabled for that container version) will simulate the redirect as if it were the specified date. You should see the homepage redirect to the specified EN page and the message bar appear, just as it would during a live campaign.
-   
+
    You can also test locally using the example HTML files (`index.html` or `wwf/index.html`) by opening them in a browser and adding the `?simulate-date=YYYY-MM-DD` parameter to the URL.
 
 5. **Verify Deployment**
@@ -66,7 +70,7 @@ To implement this homepage takeover on your site, follow these steps:
 
 ## Date Configuration
 
-The script uses the `YYYY-MM-DD` date format (ISO 8601 standard) for all date configurations. This ensures clear, unambiguous date matching.
+The script only supports the `YYYY-MM-DD` date format (ISO 8601 standard) for all date configurations. This ensures clear, unambiguous date matching. No other date formats are supported.
 
 ### Configuration Structure
 
@@ -77,36 +81,43 @@ window.landingPageRedirectConfig = {
   urlsByDate: {
     "2025-12-03": "https://support.example.org/page/12345/donate/1",
     "2025-12-30": "https://support.example.org/page/12345/donate/1",
-    "2025-12-31": "https://support.example.org/page/12345/donate/1"
+    "2025-12-31": "https://support.example.org/page/12345/donate/1",
   },
-  suppressionCookie: "redirectSuppressed",  // Optional, defaults shown
-  suppressionDurationDays: 1                 // Optional, defaults shown
+  suppressionCookie: "redirectSuppressed", // Optional, defaults shown
+  suppressionDurationDays: 1, // Optional, defaults shown
 };
 ```
 
 ### Date Format (`YYYY-MM-DD`)
 
-All dates must be in `YYYY-MM-DD` format (e.g., `"2025-12-03"` for December 3rd, 2025). This format:
-- Is year-specific (each date must include the full year)
+**Only `YYYY-MM-DD` format is supported.** All dates must be in `YYYY-MM-DD` format (e.g., `"2025-12-03"` for December 3rd, 2025). This format:
+
+- Requires the full year (each date must include the full year)
 - Follows ISO 8601 standard for consistency
 - Prevents ambiguity between different date formats
 - Makes it easy to configure multiple years with different URLs
+
+**Note:** Other date formats (such as `MM-DD` or `MM-DD-YYYY`) are not supported.
 
 ### Example Configuration
 
 ```javascript
 window.landingPageRedirectConfig = {
   urlsByDate: {
-    "2025-12-03": "https://support.example.org/page/12345/donate/1?campaign=year-end-2025",
-    "2025-12-31": "https://support.example.org/page/12345/donate/1?campaign=new-year-eve-2025",
-    "2026-12-03": "https://support.example.org/page/12345/donate/1?campaign=year-end-2026"
+    "2025-12-03":
+      "https://support.example.org/page/12345/donate/1?campaign=year-end-2025",
+    "2025-12-31":
+      "https://support.example.org/page/12345/donate/1?campaign=new-year-eve-2025",
+    "2026-12-03":
+      "https://support.example.org/page/12345/donate/1?campaign=year-end-2026",
   },
   suppressionCookie: "redirectSuppressed",
-  suppressionDurationDays: 1
+  suppressionDurationDays: 1,
 };
 ```
 
 This configuration will redirect users on:
+
 - December 3rd, 2025 to the year-end-2025 campaign page
 - December 31st, 2025 to the new-year-eve-2025 campaign page
 - December 3rd, 2026 to the year-end-2026 campaign page
@@ -118,19 +129,21 @@ This configuration will redirect users on:
 For testing purposes, the landing page script supports a `simulate-date` query parameter. You can append this to the URL to simulate how the redirect behaves on specific dates. This is useful for previewing the takeover logic without waiting for the actual dates.
 
 **Date Format:**
-- `YYYY-MM-DD` format: `?simulate-date=2025-12-03`
+
+- Only `YYYY-MM-DD` format is supported: `?simulate-date=2025-12-03`
 
 Example usage:
-* **Simulate December 3rd, 2025** – *Redirects to configured EN page for that date* - 
+
+- **Simulate December 3rd, 2025** – _Redirects to configured EN page for that date_ -
   `https://yourwebsite.org?simulate-date=2025-12-03`
 
-* **Simulate December 30th, 2025** – *Redirects to configured EN page for that date* - 
+- **Simulate December 30th, 2025** – _Redirects to configured EN page for that date_ -
   `https://yourwebsite.org?simulate-date=2025-12-30`
 
-* **Simulate January 15th, 2025** – *No redirect occurs (date not in redirect list)* - 
+- **Simulate January 15th, 2025** – _No redirect occurs (date not in redirect list)_ -
   `https://yourwebsite.org?simulate-date=2025-01-15`
 
-* **Test locally with example files** – Open `index.html?simulate-date=2025-12-03` in your browser to test the redirect functionality locally.
+- **Test locally with example files** – Open `index.html?simulate-date=2025-12-03` in your browser to test the redirect functionality locally.
 
 **Note:** The `simulate-date` parameter must match the exact `YYYY-MM-DD` format used in your configuration. If the simulated date matches a configured date in `urlsByDate`, the redirect will occur.
 
@@ -143,6 +156,7 @@ Example usage:
 The script requires a configuration object `window.landingPageRedirectConfig` to be defined before the script loads:
 
 **`urlsByDate`** - Object mapping dates to redirect URLs (required)
+
 - Keys: Date strings in `"YYYY-MM-DD"` format (e.g., `"2025-12-03"`)
 - Values: Full URLs to Engaging Networks pages (include tracking parameters as needed)
 
@@ -151,57 +165,74 @@ The script requires a configuration object `window.landingPageRedirectConfig` to
 **`suppressionDurationDays`** - How long to suppress redirects in days (optional, default: `1` day)
 
 **Example Configuration:**
+
 ```javascript
 window.landingPageRedirectConfig = {
   urlsByDate: {
-    "2025-12-03": "https://support.example.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
-    "2025-12-31": "https://support.example.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE"
+    "2025-12-03":
+      "https://support.example.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
+    "2025-12-31":
+      "https://support.example.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
   },
   suppressionCookie: "redirectSuppressed",
-  suppressionDurationDays: 1
+  suppressionDurationDays: 1,
 };
 ```
 
-### Engaging Networks Page Script (`en-code-block.js`)
+### Engaging Networks Page Script (`target-page-script.js`)
 
-**`returnLinkTextTemplate`** - Template for the return link text
+The script requires a configuration object `window.targetPageConfig` to be defined before the script loads:
+
+**`returnLinkTextTemplate`** - Template for the return link text (optional, default: `"Click here to continue to {domain}"`)
+
 - Must include `{domain}` placeholder which will be replaced with the actual domain
-- Example: `"Click here to continue to {domain}"`
 - The domain is automatically extracted from the referrer/originating URL
 
-**`COOKIE_EXPIRATION_SECONDS`** - How long to store the originating URL in a cookie (default: `1800` seconds / 30 minutes)
+**`cookieExpirationSeconds`** - How long to store the originating URL in a cookie (optional, default: `1800` seconds / 30 minutes)
 
-**`BANNER_STYLE`** - CSS styles for the message bar banner
+**`bannerStyle`** - CSS styles for the message bar banner (optional, has default styling)
 
-**`LINK_STYLE`** - CSS styles for the return link
+**`linkStyle`** - CSS styles for the return link (optional, has default styling)
+
+**Example Configuration:**
+
+```javascript
+window.targetPageConfig = {
+  returnLinkTextTemplate: "Click here to continue to {domain}",
+  cookieExpirationSeconds: 1800,
+  bannerStyle:
+    "position:fixed;top:0;width:100%;background-color:#000000;color:#fff;padding:15px 10px;text-align:center;z-index:9999;box-sizing:border-box;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;",
+  linkStyle: "color:#ffffff;text-decoration:underline;",
+};
+```
 
 ---
 
 ## Developer Notes
 
-* **URL Parameters Preserved**
+- **URL Parameters Preserved**
   Redirects will include any URL arguments present on the landing page. All query parameters are carried over to the EN donation page.
 
-* **Customizing Text**
-  To change the return message bar text, edit the `returnLinkTextTemplate` configuration variable in `en-code-block.js`. The `{domain}` placeholder will be automatically replaced with the actual domain from the referrer. To change redirect dates and URLs, edit the `urlsByDate` object in your configuration (see example HTML files for reference).
+- **Customizing Text**
+  To change the return message bar text, edit the `returnLinkTextTemplate` property in your `window.targetPageConfig` object. The `{domain}` placeholder will be automatically replaced with the actual domain from the referrer. To change redirect dates and URLs, edit the `urlsByDate` object in your `window.landingPageRedirectConfig` configuration (see example HTML files for reference).
 
-* **Date Format**
-  All dates must be in `YYYY-MM-DD` format. This ensures clear, unambiguous date matching and follows ISO 8601 standards.
+- **Date Format**
+  Only `YYYY-MM-DD` format is supported. All dates must be in this format. This ensures clear, unambiguous date matching and follows ISO 8601 standards. No other date formats are supported.
 
-* **Error Handling**
+- **Error Handling**
   The scripts include comprehensive error handling for URL construction, cookie operations, and DOM manipulation. Errors are logged to the console for debugging purposes.
 
-* **Security**
+- **Security**
   The code uses `textContent` instead of `innerHTML` to prevent XSS vulnerabilities. All user input is properly sanitized and validated.
 
-* **Set It and Forget It**
+- **Set It and Forget It**
   The script is meant to run during the campaign window and can be safely left in place until you're ready to remove it post-campaign.
 
 ---
 
 ## Technical Details
 
-* **Cookie Suppression**: Uses proper cookie parsing to avoid false positives
-* **Date Validation**: Validates both format and actual date validity (prevents invalid dates like "13-45" or "02-30")
-* **URL Fallback**: Handles edge cases where referrer or originating URL may not be available
-* **Cross-Browser Compatibility**: Works in all modern browsers that support ES6 features
+- **Cookie Suppression**: Uses proper cookie parsing to avoid false positives
+- **Date Validation**: Validates both format and actual date validity (prevents invalid dates like "13-45" or "02-30")
+- **URL Fallback**: Handles edge cases where referrer or originating URL may not be available
+- **Cross-Browser Compatibility**: Works in all modern browsers that support ES6 features

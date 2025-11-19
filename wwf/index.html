@@ -68,46 +68,24 @@
       <h2>How This Works</h2>
       <p>
         This page demonstrates the landing page redirect functionality. The
-        script below will automatically redirect visitors to an Engaging
-        Networks donation page on configured dates.
+        script will automatically redirect visitors to an Engaging Networks
+        donation page on configured dates.
       </p>
 
       <div class="info-box">
-        <strong>Note:</strong> In production, this script would typically be
-        loaded via Google Tag Manager (GTM) rather than directly in the HTML.
-        This example shows it inline for demonstration purposes.
+        <strong>Note:</strong> For fastest performance, load this script in the
+        <code>&lt;head&gt;</code> section as high up as possible. While Google
+        Tag Manager (GTM) is an option, loading directly in the
+        <code>&lt;head&gt;</code> is the most preferable method for optimal
+        redirect speed. This example shows it inline for demonstration purposes.
       </div>
-
-      <h3>Testing the Redirect</h3>
-      <p>
-        You can test the redirect functionality using the following URL
-        parameters:
-      </p>
-      <ul>
-        <li>
-          <strong>Simulate a date:</strong> Add
-          <code>?simulate-date=2025-12-03</code> to test December 3rd, 2025
-          redirects. For example:
-          <code>index.html?simulate-date=2025-12-03</code>
-        </li>
-        <li>
-          <strong>Opt out:</strong> Add <code>?no-redirect</code> to prevent
-          redirects. For example: <code>index.html?no-redirect</code>
-        </li>
-        <li>
-          <strong>Combined:</strong>
-          <code>?simulate-date=2025-12-03&no-redirect</code> to simulate a date
-          but opt out. For example:
-          <code>index.html?simulate-date=2025-12-03&no-redirect</code>
-        </li>
-      </ul>
     </div>
 
     <div class="content">
-      <h2>Configuration</h2>
+      <h2>Configuration & Testing</h2>
       <p>
-        The redirect dates are configured in the <code>urlsByDate</code> object
-        in the script below. Currently configured dates:
+        The redirect dates are configured in the <code>urlsByDate</code> object.
+        Currently configured dates:
       </p>
       <ul>
         <li>
@@ -121,6 +99,52 @@
         <li>
           <strong>December 31, 2025</strong> - Redirects to Engaging Networks
           page
+        </li>
+      </ul>
+
+      <h3>Example Code</h3>
+      <p>The following code is running on this page:</p>
+      <div class="code-block">
+        <pre><code>&lt;script&gt;
+  // ============================================================================
+  // CONFIGURATION
+  // ============================================================================
+  // Configure the dates and corresponding Engaging Networks page URLs
+  // Date format: "YYYY-MM-DD" (e.g., "2025-12-03" for December 3rd, 2025)
+  // Include any necessary URL parameters such as tracking codes in the URLs
+  window.landingPageRedirectConfig = {
+    urlsByDate: {
+      "2025-12-03":
+        "https://protect.worldwildlife.org/page/88974/donate/1?transaction.othamt1=TRACKINGCODE1",
+      "2025-12-30":
+        "https://protect.worldwildlife.org/page/88974/donate/1?transaction.othamt1=TRACKINGCODE2",
+      "2025-12-31":
+        "https://protect.worldwildlife.org/page/88974/donate/1?transaction.othamt1=TRACKINGCODE3",
+    },
+    suppressionCookie: "redirectSuppressed",
+    suppressionDurationDays: 1,
+  };
+&lt;/script&gt;
+&lt;script src="../redirect-script.js"&gt;&lt;/script&gt;</code></pre>
+      </div>
+
+      <h3>Testing the Redirect</h3>
+      <p>
+        You can test the redirect functionality by adding the
+        <code>simulate-date</code> parameter to the URL. For example:
+      </p>
+      <ul>
+        <li>
+          <code>index.html?simulate-date=2025-12-03</code> - Tests December 3rd,
+          2025 redirect
+        </li>
+        <li>
+          <code>index.html?simulate-date=2025-12-30</code> - Tests December
+          30th, 2025 redirect
+        </li>
+        <li>
+          <code>index.html?simulate-date=2025-12-31</code> - Tests December
+          31st, 2025 redirect
         </li>
       </ul>
     </div>
