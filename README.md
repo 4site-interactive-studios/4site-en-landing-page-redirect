@@ -4,9 +4,13 @@ This repository contains example code and resources for a **homepage takeover** 
 
 **DEMO Recording**: [Demo Recording](https://cln.sh/gWLHqRry)
 
-**Landing Page Code**: [`landing-page-gtm-tag.js`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/landing-page-gtm-tag.js)
+**Landing Page Script**: [`redirect-script.js`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/redirect-script.js)
 
 **Engaging Networks Page Code**: [`en-code-block.js`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/en-code-block.js)
+
+**Example HTML Files**: 
+- [`index.html`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/index.html) - Generic example landing page
+- [`wwf/index.html`](https://github.com/4site-interactive-studios/4site-en-landing-page-redirect/blob/main/wwf/index.html) - WWF-specific example landing page
 
 ---
 
@@ -27,29 +31,33 @@ This repository contains example code and resources for a **homepage takeover** 
 
 To implement this homepage takeover on your site, follow these steps:
 
-1. **Configure the GTM Tag Script**
-   Edit the `landing-page-gtm-tag.js` file and configure the `urlsByDate` object at the top of the file with your specific dates and corresponding Engaging Networks page URLs. 
+1. **Configure the Redirect Script**
+   The redirect script uses a configuration object that must be defined before the script loads. Create a configuration object with your specific dates and corresponding Engaging Networks page URLs.
    
-   **Date Format Options:**
-   - `"MM-DD"` format (e.g., `"12-03"`) - Matches the date every year (year-agnostic)
-   - `"MM-DD-YYYY"` format (e.g., `"12-03-2024"`) - Matches the date only in the specified year (year-specific)
+   **Date Format:**
+   - `"YYYY-MM-DD"` format (e.g., `"2025-12-03"`) - Matches the date only in the specified year (year-specific)
    
-   Year-specific dates take precedence over year-agnostic dates when both are configured for the same month and day. Include any necessary URL arguments such as tracking codes in the URLs. Copy this script into your Google Tag Manager tag.
+   Include any necessary URL arguments such as tracking codes in the URLs. See the example HTML files for reference on how to structure the configuration.
 
 2. **Configure the EN Page Code**
    Edit the `en-code-block.js` file and set the `returnLinkTextTemplate` configuration variable at the top of the file with your desired return message text template. The template should include `{domain}` as a placeholder, which will be automatically replaced with the actual domain from the referrer URL. On the Engaging Networks donation page (and its thank-you page) that users will be redirected to, include this script at the bottom of the page. This code is responsible for displaying the return message bar and handling the return link logic on the EN pages.
 
 3. **Configure GTM Tag**
-   In **Google Tag Manager**, create or edit a Custom HTML tag with the configured `landing-page-gtm-tag.js` script. Set the tag to fire on the appropriate pages (e.g., the site's homepage or site-wide) and on the correct dates.
+   In **Google Tag Manager**, create or edit a Custom HTML tag that includes:
+   1. The configuration object (`window.landingPageRedirectConfig`) with your dates and URLs
+   2. A script tag that loads `redirect-script.js` (you can host this file on your server or use a CDN)
+   
+   Set the tag to fire on the appropriate pages (e.g., the site's homepage or site-wide). The script will automatically check dates and redirect when needed.
 
 4. **Publish / Testing GTM Changes**
    After configuring the tag, publish the updated GTM container so that the changes are saved and ready. Before pushing the GTM container live, you can preview the homepage takeover using **GTM's Preview Mode**. This lets you test the functionality on the real site without affecting all visitors. 
    
    **Testing with Simulated Dates:**
-   - Year-agnostic: `https://yourwebsite.org?simulate-date=12-03` (simulates December 3rd)
-   - Year-specific: `https://yourwebsite.org?simulate-date=12-03-2024` (simulates December 3rd, 2024)
+   - Use the `YYYY-MM-DD` format: `https://yourwebsite.org?simulate-date=2025-12-03` (simulates December 3rd, 2025)
    
    Using these URLs (with GTM Preview enabled for that container version) will simulate the redirect as if it were the specified date. You should see the homepage redirect to the specified EN page and the message bar appear, just as it would during a live campaign.
+   
+   You can also test locally using the example HTML files (`index.html` or `wwf/index.html`) by opening them in a browser and adding the `?simulate-date=YYYY-MM-DD` parameter to the URL.
 
 5. **Verify Deployment**
    Once the container is pushed live, test the functionality on the live site around the specified date to ensure the redirect and return bar work as expected.
@@ -58,37 +66,50 @@ To implement this homepage takeover on your site, follow these steps:
 
 ## Date Configuration
 
-The script supports two date formats for maximum flexibility:
+The script uses the `YYYY-MM-DD` date format (ISO 8601 standard) for all date configurations. This ensures clear, unambiguous date matching.
 
-### Year-Agnostic Dates (`MM-DD`)
-Use this format when you want a redirect to occur on the same date every year. For example:
+### Configuration Structure
+
+The script requires a configuration object to be defined before it loads:
+
 ```javascript
-const urlsByDate = {
-  "12-03": "https://support.example.org/page/12345/donate/1",
-  "12-31": "https://support.example.org/page/12345/donate/1"
+window.landingPageRedirectConfig = {
+  urlsByDate: {
+    "2025-12-03": "https://support.example.org/page/12345/donate/1",
+    "2025-12-30": "https://support.example.org/page/12345/donate/1",
+    "2025-12-31": "https://support.example.org/page/12345/donate/1"
+  },
+  suppressionCookie: "redirectSuppressed",  // Optional, defaults shown
+  suppressionDurationDays: 1                 // Optional, defaults shown
 };
 ```
-This configuration will redirect users on December 3rd and December 31st every year.
 
-### Year-Specific Dates (`MM-DD-YYYY`)
-Use this format when you want a redirect to occur only in a specific year. For example:
+### Date Format (`YYYY-MM-DD`)
+
+All dates must be in `YYYY-MM-DD` format (e.g., `"2025-12-03"` for December 3rd, 2025). This format:
+- Is year-specific (each date must include the full year)
+- Follows ISO 8601 standard for consistency
+- Prevents ambiguity between different date formats
+- Makes it easy to configure multiple years with different URLs
+
+### Example Configuration
+
 ```javascript
-const urlsByDate = {
-  "12-03-2024": "https://support.example.org/page/12345/donate/1",
-  "12-31-2024": "https://support.example.org/page/12345/donate/1"
+window.landingPageRedirectConfig = {
+  urlsByDate: {
+    "2025-12-03": "https://support.example.org/page/12345/donate/1?campaign=year-end-2025",
+    "2025-12-31": "https://support.example.org/page/12345/donate/1?campaign=new-year-eve-2025",
+    "2026-12-03": "https://support.example.org/page/12345/donate/1?campaign=year-end-2026"
+  },
+  suppressionCookie: "redirectSuppressed",
+  suppressionDurationDays: 1
 };
 ```
-This configuration will redirect users on December 3rd and December 31st only in 2024.
 
-### Mixed Configuration
-You can mix both formats in the same configuration. Year-specific dates take precedence:
-```javascript
-const urlsByDate = {
-  "12-03": "https://support.example.org/page/default/donate/1",  // Every year
-  "12-03-2024": "https://support.example.org/page/special/donate/1"  // Only 2024
-};
-```
-In this example, December 3rd, 2024 will use the special URL, while December 3rd in other years will use the default URL.
+This configuration will redirect users on:
+- December 3rd, 2025 to the year-end-2025 campaign page
+- December 31st, 2025 to the new-year-eve-2025 campaign page
+- December 3rd, 2026 to the year-end-2026 campaign page
 
 ---
 
@@ -96,36 +117,50 @@ In this example, December 3rd, 2024 will use the special URL, while December 3rd
 
 For testing purposes, the landing page script supports a `simulate-date` query parameter. You can append this to the URL to simulate how the redirect behaves on specific dates. This is useful for previewing the takeover logic without waiting for the actual dates.
 
-**Supported Date Formats:**
-- `MM-DD` format: `?simulate-date=12-03`
-- `MM-DD-YYYY` format: `?simulate-date=12-03-2024`
+**Date Format:**
+- `YYYY-MM-DD` format: `?simulate-date=2025-12-03`
 
 Example usage:
-* **Simulate 12/03 (any year)** – *Redirects to configured EN page for that date* - 
-  `https://yourwebsite.org?simulate-date=12-03`
+* **Simulate December 3rd, 2025** – *Redirects to configured EN page for that date* - 
+  `https://yourwebsite.org?simulate-date=2025-12-03`
 
-* **Simulate 12/03/2024 (specific year)** – *Redirects to configured EN page for that specific date* - 
-  `https://yourwebsite.org?simulate-date=12-03-2024`
+* **Simulate December 30th, 2025** – *Redirects to configured EN page for that date* - 
+  `https://yourwebsite.org?simulate-date=2025-12-30`
 
-* **Simulate 12/20** – *No redirect occurs (date not in redirect list)* - 
-  `https://yourwebsite.org?simulate-date=12-20`
+* **Simulate January 15th, 2025** – *No redirect occurs (date not in redirect list)* - 
+  `https://yourwebsite.org?simulate-date=2025-01-15`
 
-* **Simulate 12/30** – *Redirects to configured EN page for that date* - 
-  `https://yourwebsite.org?simulate-date=12-30`
+* **Test locally with example files** – Open `index.html?simulate-date=2025-12-03` in your browser to test the redirect functionality locally.
+
+**Note:** The `simulate-date` parameter must match the exact `YYYY-MM-DD` format used in your configuration. If the simulated date matches a configured date in `urlsByDate`, the redirect will occur.
 
 ---
 
 ## Configuration Options
 
-### Landing Page Script (`landing-page-gtm-tag.js`)
+### Landing Page Script (`redirect-script.js`)
 
-**`urlsByDate`** - Object mapping dates to redirect URLs
-- Keys: Date strings in `"MM-DD"` or `"MM-DD-YYYY"` format
+The script requires a configuration object `window.landingPageRedirectConfig` to be defined before the script loads:
+
+**`urlsByDate`** - Object mapping dates to redirect URLs (required)
+- Keys: Date strings in `"YYYY-MM-DD"` format (e.g., `"2025-12-03"`)
 - Values: Full URLs to Engaging Networks pages (include tracking parameters as needed)
 
-**`suppressionCookie`** - Cookie name for redirect suppression (default: `"redirectSuppressed"`)
+**`suppressionCookie`** - Cookie name for redirect suppression (optional, default: `"redirectSuppressed"`)
 
-**`SUPPRESSION_DURATION_DAYS`** - How long to suppress redirects (default: `1` day)
+**`suppressionDurationDays`** - How long to suppress redirects in days (optional, default: `1` day)
+
+**Example Configuration:**
+```javascript
+window.landingPageRedirectConfig = {
+  urlsByDate: {
+    "2025-12-03": "https://support.example.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE",
+    "2025-12-31": "https://support.example.org/page/12345/donate/1?transaction.othamt1=TRACKINGCODE"
+  },
+  suppressionCookie: "redirectSuppressed",
+  suppressionDurationDays: 1
+};
+```
 
 ### Engaging Networks Page Script (`en-code-block.js`)
 
@@ -148,10 +183,10 @@ Example usage:
   Redirects will include any URL arguments present on the landing page. All query parameters are carried over to the EN donation page.
 
 * **Customizing Text**
-  To change the return message bar text, edit the `returnLinkTextTemplate` configuration variable in `en-code-block.js`. The `{domain}` placeholder will be automatically replaced with the actual domain from the referrer. To change redirect dates and URLs, edit the `urlsByDate` object in `landing-page-gtm-tag.js`.
+  To change the return message bar text, edit the `returnLinkTextTemplate` configuration variable in `en-code-block.js`. The `{domain}` placeholder will be automatically replaced with the actual domain from the referrer. To change redirect dates and URLs, edit the `urlsByDate` object in your configuration (see example HTML files for reference).
 
-* **Date Matching Priority**
-  When both year-agnostic (`MM-DD`) and year-specific (`MM-DD-YYYY`) dates are configured for the same month and day, the year-specific date takes precedence for that year.
+* **Date Format**
+  All dates must be in `YYYY-MM-DD` format. This ensures clear, unambiguous date matching and follows ISO 8601 standards.
 
 * **Error Handling**
   The scripts include comprehensive error handling for URL construction, cookie operations, and DOM manipulation. Errors are logged to the console for debugging purposes.
