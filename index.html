@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Homepage Takeover Redirect - Example Landing Page</title>
+    <title>Homepage Takeover Redirect - General Example Landing Page</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -100,13 +100,33 @@
         </li>
       </ul>
 
-      <div class="test-links">
-        <a href="?simulate-date=2025-12-03">Test: Dec 3, 2025</a>
-        <a href="?simulate-date=2025-12-30">Test: Dec 30, 2025</a>
-        <a href="?simulate-date=2025-12-31">Test: Dec 31, 2025</a>
-        <a href="?simulate-date=2025-01-15">Test: Jan 15, 2025 (No redirect)</a>
-        <a href="?no-redirect">Opt Out</a>
+      <div class="test-links" id="test-links">
+        <a href="#" data-date="2025-12-03">Test: Dec 3, 2025</a>
+        <a href="#" data-date="2025-12-30">Test: Dec 30, 2025</a>
+        <a href="#" data-date="2025-12-31">Test: Dec 31, 2025</a>
+        <a href="#" data-date="2025-01-15">Test: Jan 15, 2025 (No redirect)</a>
+        <a href="#" data-no-redirect>Opt Out</a>
       </div>
+      <script>
+        // Set up test link URLs dynamically
+        (function () {
+          const testLinks = document.getElementById("test-links");
+          if (testLinks) {
+            const baseUrl = window.location.pathname;
+            const links = testLinks.querySelectorAll("a[data-date]");
+            links.forEach(function (link) {
+              link.href =
+                baseUrl + "?simulate-date=" + link.getAttribute("data-date");
+            });
+            const noRedirectLink = testLinks.querySelector(
+              "a[data-no-redirect]"
+            );
+            if (noRedirectLink) {
+              noRedirectLink.href = baseUrl + "?no-redirect";
+            }
+          }
+        })();
+      </script>
     </div>
 
     <div class="content">
